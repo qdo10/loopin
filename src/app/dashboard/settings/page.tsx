@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { ArrowLeft, Save, Loader2, User } from 'lucide-react'
+import BrandingSettings from '@/components/BrandingSettings'
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -16,6 +17,9 @@ export default function SettingsPage() {
   const [name, setName] = useState('')
   const [businessName, setBusinessName] = useState('')
   const [email, setEmail] = useState('')
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const [brandColor, setBrandColor] = useState('#6366f1')
+  const [isPro, setIsPro] = useState(false)
 
   useEffect(() => {
     loadUser()
@@ -38,6 +42,9 @@ export default function SettingsPage() {
 
     if (profile) {
       setUserId(profile.id)
+      setLogoUrl(profile.logo_url)
+      setBrandColor(profile.brand_color || '#6366f1')
+      setIsPro(profile.subscription_status === 'pro')
       setName(profile.name || '')
       setBusinessName(profile.business_name || '')
     }
@@ -63,6 +70,21 @@ export default function SettingsPage() {
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     }
+  }
+
+  const handleBrandingUpdate = async (newLogoUrl: string | null, newBrandColor: string) => {
+    if (!userId) return
+
+    await supabase
+      .from('users')
+      .update({
+        logo_url: newLogoUrl,
+        brand_color: newBrandColor,
+      })
+      .eq('id', userId)
+
+    setLogoUrl(newLogoUrl)
+    setBrandColor(newBrandColor)
   }
 
   if (loading) {
@@ -159,6 +181,17 @@ export default function SettingsPage() {
             </>
           )}
         </button>
+
+        {/* Branding Section */}
+        <div className="mt-8">
+          <BrandingSettings
+            userId={userId}
+            currentLogo={logoUrl}
+            currentColor={brandColor}
+            isPro={isPro}
+            onUpdate={handleBrandingUpdate}
+          />
+        </div>
 
         {/* Danger Zone */}
         <section className="mt-12 pt-8 border-t border-slate-700">

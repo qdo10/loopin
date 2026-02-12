@@ -4,9 +4,26 @@ export interface User {
   name: string | null
   business_name: string | null
   avatar_url: string | null
+  logo_url: string | null
+  brand_color: string
   stripe_customer_id: string | null
   subscription_status: 'free' | 'pro' | 'cancelled'
   created_at: string
+}
+
+export interface PortalView {
+  id: string
+  project_id: string
+  viewed_at: string
+  user_agent: string | null
+  referrer: string | null
+}
+
+export interface AnalyticsStats {
+  totalViews: number
+  weeklyViews: number
+  dailyViews: number
+  recentViews: { viewed_at: string }[]
 }
 
 export interface Project {

@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS users (
   name TEXT,
   business_name TEXT,
   avatar_url TEXT,
+  logo_url TEXT,
+  brand_color TEXT DEFAULT '#6366f1',
   stripe_customer_id TEXT,
   subscription_status TEXT DEFAULT 'free' CHECK (subscription_status IN ('free', 'pro', 'cancelled')),
   created_at TIMESTAMPTZ DEFAULT NOW()
@@ -61,12 +63,24 @@ CREATE TABLE IF NOT EXISTS deliverables (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Portal views for analytics
+CREATE TABLE IF NOT EXISTS portal_views (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  viewed_at TIMESTAMPTZ DEFAULT NOW(),
+  user_agent TEXT,
+  referrer TEXT,
+  ip_hash TEXT
+);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_projects_user_id ON projects(user_id);
 CREATE INDEX IF NOT EXISTS idx_projects_share_token ON projects(share_token);
 CREATE INDEX IF NOT EXISTS idx_milestones_project_id ON milestones(project_id);
 CREATE INDEX IF NOT EXISTS idx_updates_project_id ON updates(project_id);
 CREATE INDEX IF NOT EXISTS idx_deliverables_project_id ON deliverables(project_id);
+CREATE INDEX IF NOT EXISTS idx_portal_views_project_id ON portal_views(project_id);
+CREATE INDEX IF NOT EXISTS idx_portal_views_viewed_at ON portal_views(viewed_at);
 
 -- Updated_at trigger for projects
 CREATE OR REPLACE FUNCTION update_updated_at()
@@ -89,6 +103,7 @@ ALTER TABLE projects DISABLE ROW LEVEL SECURITY;
 ALTER TABLE milestones DISABLE ROW LEVEL SECURITY;
 ALTER TABLE updates DISABLE ROW LEVEL SECURITY;
 ALTER TABLE deliverables DISABLE ROW LEVEL SECURITY;
+ALTER TABLE portal_views DISABLE ROW LEVEL SECURITY;
 
 -- Storage Buckets (run these in Supabase Dashboard > Storage)
 -- 1. Create bucket: deliverables (public)

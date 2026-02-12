@@ -11,6 +11,7 @@ import {
   Download, Upload, FileText
 } from 'lucide-react'
 import DeliverableUpload from '@/components/DeliverableUpload'
+import AnalyticsCard from '@/components/AnalyticsCard'
 
 export default function ProjectDetailPage() {
   const params = useParams()
@@ -225,6 +226,11 @@ export default function ProjectDetailPage() {
               View Portal
             </a>
           </div>
+        </div>
+
+        {/* Analytics */}
+        <div className="mb-8">
+          <AnalyticsCard projectId={project.id} />
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">

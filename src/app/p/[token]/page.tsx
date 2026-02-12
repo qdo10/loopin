@@ -74,6 +74,25 @@ export default function PortalPage() {
       deliverables: deliverables || [],
     })
     setLoading(false)
+
+    // Track the view
+    trackView(projectData.id)
+  }
+
+  const trackView = async (projectId: string) => {
+    try {
+      await fetch('/api/analytics/view', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectId,
+          userAgent: navigator.userAgent,
+          referrer: document.referrer || null,
+        }),
+      })
+    } catch (error) {
+      // Silent fail for analytics
+    }
   }
 
   if (loading) {
