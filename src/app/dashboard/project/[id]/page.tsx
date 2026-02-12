@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import DeliverableUpload from '@/components/DeliverableUpload'
 import AnalyticsCard from '@/components/AnalyticsCard'
+import ProjectActions from '@/components/ProjectActions'
 
 export default function ProjectDetailPage() {
   const params = useParams()
@@ -225,6 +226,12 @@ export default function ProjectDetailPage() {
               <ExternalLink className="w-4 h-4" />
               View Portal
             </a>
+            <ProjectActions
+              projectId={project.id}
+              projectName={project.name}
+              status={project.status}
+              onStatusChange={loadProject}
+            />
           </div>
         </div>
 

@@ -26,6 +26,15 @@ export interface AnalyticsStats {
   recentViews: { viewed_at: string }[]
 }
 
+export interface Comment {
+  id: string
+  project_id: string
+  content: string
+  author_name: string
+  author_email: string | null
+  created_at: string
+}
+
 export interface Project {
   id: string
   user_id: string

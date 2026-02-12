@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { ProjectWithDetails, Milestone, Update, Deliverable } from '@/lib/types'
 import { CheckCircle, Circle, Clock, Download, FileText, Calendar, ArrowRight } from 'lucide-react'
+import PortalComments from '@/components/PortalComments'
 
 export default function PortalPage() {
   const params = useParams()
@@ -188,6 +189,9 @@ export default function PortalPage() {
                 </div>
               </section>
             )}
+
+            {/* Comments */}
+            <PortalComments projectId={project.id} />
           </div>
 
           {/* Sidebar */}

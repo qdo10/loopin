@@ -73,6 +73,16 @@ CREATE TABLE IF NOT EXISTS portal_views (
   ip_hash TEXT
 );
 
+-- Client comments
+CREATE TABLE IF NOT EXISTS comments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  author_name TEXT NOT NULL,
+  author_email TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_projects_user_id ON projects(user_id);
 CREATE INDEX IF NOT EXISTS idx_projects_share_token ON projects(share_token);
@@ -81,6 +91,7 @@ CREATE INDEX IF NOT EXISTS idx_updates_project_id ON updates(project_id);
 CREATE INDEX IF NOT EXISTS idx_deliverables_project_id ON deliverables(project_id);
 CREATE INDEX IF NOT EXISTS idx_portal_views_project_id ON portal_views(project_id);
 CREATE INDEX IF NOT EXISTS idx_portal_views_viewed_at ON portal_views(viewed_at);
+CREATE INDEX IF NOT EXISTS idx_comments_project_id ON comments(project_id);
 
 -- Updated_at trigger for projects
 CREATE OR REPLACE FUNCTION update_updated_at()
@@ -104,6 +115,7 @@ ALTER TABLE milestones DISABLE ROW LEVEL SECURITY;
 ALTER TABLE updates DISABLE ROW LEVEL SECURITY;
 ALTER TABLE deliverables DISABLE ROW LEVEL SECURITY;
 ALTER TABLE portal_views DISABLE ROW LEVEL SECURITY;
+ALTER TABLE comments DISABLE ROW LEVEL SECURITY;
 
 -- Storage Buckets (run these in Supabase Dashboard > Storage)
 -- 1. Create bucket: deliverables (public)
