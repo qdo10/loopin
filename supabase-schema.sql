@@ -89,3 +89,11 @@ ALTER TABLE projects DISABLE ROW LEVEL SECURITY;
 ALTER TABLE milestones DISABLE ROW LEVEL SECURITY;
 ALTER TABLE updates DISABLE ROW LEVEL SECURITY;
 ALTER TABLE deliverables DISABLE ROW LEVEL SECURITY;
+
+-- Storage Buckets (run these in Supabase Dashboard > Storage)
+-- 1. Create bucket: deliverables (public)
+-- 2. Create bucket: attachments (public)
+-- 
+-- Or via SQL (requires admin access):
+-- INSERT INTO storage.buckets (id, name, public) VALUES ('deliverables', 'deliverables', true);
+-- INSERT INTO storage.buckets (id, name, public) VALUES ('attachments', 'attachments', true);

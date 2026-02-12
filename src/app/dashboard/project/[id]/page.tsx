@@ -7,8 +7,10 @@ import { supabase } from '@/lib/supabase'
 import { ProjectWithDetails, Milestone, Update } from '@/lib/types'
 import { 
   ArrowLeft, ExternalLink, Copy, Check, Plus, 
-  Trash2, Send, GripVertical, CheckCircle, Circle, Clock
+  Trash2, Send, GripVertical, CheckCircle, Circle, Clock,
+  Download, Upload, FileText
 } from 'lucide-react'
+import DeliverableUpload from '@/components/DeliverableUpload'
 
 export default function ProjectDetailPage() {
   const params = useParams()
@@ -26,6 +28,9 @@ export default function ProjectDetailPage() {
   // New milestone form
   const [showMilestoneForm, setShowMilestoneForm] = useState(false)
   const [newMilestone, setNewMilestone] = useState({ title: '', due_date: '' })
+
+  // Deliverables
+  const [showDeliverableUpload, setShowDeliverableUpload] = useState(false)
 
   useEffect(() => {
     loadProject()
@@ -155,6 +160,21 @@ export default function ProjectDetailPage() {
       .eq('id', updateId)
 
     loadProject()
+  }
+
+  const deleteDeliverable = async (deliverableId: string) => {
+    await supabase
+      .from('deliverables')
+      .delete()
+      .eq('id', deliverableId)
+
+    loadProject()
+  }
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return bytes + ' B'
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
   }
 
   if (loading || !project) {
@@ -361,6 +381,80 @@ export default function ProjectDetailPage() {
             </div>
           </section>
         </div>
+
+        {/* Deliverables Section - Full Width */}
+        <section className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 mt-8">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-semibold text-white">Deliverables</h2>
+            <button
+              onClick={() => setShowDeliverableUpload(!showDeliverableUpload)}
+              className="text-indigo-400 hover:text-indigo-300 flex items-center gap-1 text-sm"
+            >
+              <Upload className="w-4 h-4" />
+              {showDeliverableUpload ? 'Cancel' : 'Upload'}
+            </button>
+          </div>
+
+          {/* Upload Form */}
+          {showDeliverableUpload && (
+            <div className="mb-6">
+              <DeliverableUpload 
+                projectId={project.id} 
+                onUploadComplete={() => {
+                  setShowDeliverableUpload(false)
+                  loadProject()
+                }} 
+              />
+            </div>
+          )}
+
+          {/* Deliverables List */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {project.deliverables.map((deliverable) => (
+              <div 
+                key={deliverable.id}
+                className="bg-slate-900/50 rounded-lg p-4 group"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-5 h-5 text-indigo-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-sm font-medium truncate">{deliverable.name}</p>
+                    <p className="text-slate-500 text-xs">{formatFileSize(deliverable.file_size)}</p>
+                    {deliverable.description && (
+                      <p className="text-slate-400 text-xs mt-1 truncate">{deliverable.description}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex justify-between items-center mt-3 pt-3 border-t border-slate-700">
+                  <a
+                    href={deliverable.file_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-indigo-400 hover:text-indigo-300 text-xs flex items-center gap-1"
+                  >
+                    <Download className="w-3 h-3" />
+                    Download
+                  </a>
+                  <button
+                    onClick={() => deleteDeliverable(deliverable.id)}
+                    className="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-400 text-xs flex items-center gap-1 transition"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {project.deliverables.length === 0 && !showDeliverableUpload && (
+            <p className="text-slate-500 text-center py-8">
+              No deliverables yet. Upload files to share with your client.
+            </p>
+          )}
+        </section>
       </div>
     </main>
   )
