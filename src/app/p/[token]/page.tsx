@@ -1,13 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { ProjectWithDetails, Milestone, Update, Deliverable } from '@/lib/types'
 import { CheckCircle, Circle, Clock, Download, FileText, Calendar, ArrowRight } from 'lucide-react'
 
 export default function PortalPage() {
   const params = useParams()
+  const router = useRouter()
   const token = params.token as string
 
   const [project, setProject] = useState<ProjectWithDetails | null>(null)
@@ -31,6 +32,18 @@ export default function PortalPage() {
       setError('Project not found or no longer available')
       setLoading(false)
       return
+    }
+
+    // Check if password protected
+    if (projectData.password_hash) {
+      // Check if user has access
+      const hasAccess = typeof window !== 'undefined' && 
+        sessionStorage.getItem(`portal_access_${token}`) === 'true'
+      
+      if (!hasAccess) {
+        router.push(`/p/${token}/password`)
+        return
+      }
     }
 
     // Get milestones

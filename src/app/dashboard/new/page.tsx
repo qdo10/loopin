@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, AlertCircle } from 'lucide-react'
 
 interface MilestoneInput {
   id: string
@@ -16,7 +16,46 @@ interface MilestoneInput {
 export default function NewProjectPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [checkingLimits, setCheckingLimits] = useState(true)
   const [error, setError] = useState('')
+  const [limitReached, setLimitReached] = useState(false)
+
+  useEffect(() => {
+    checkFreeTierLimit()
+  }, [])
+
+  const checkFreeTierLimit = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      router.push('/login')
+      return
+    }
+
+    // Check subscription status
+    const { data: profile } = await supabase
+      .from('users')
+      .select('subscription_status')
+      .eq('id', user.id)
+      .single()
+
+    if (profile?.subscription_status === 'pro') {
+      setCheckingLimits(false)
+      return
+    }
+
+    // Check active project count for free users
+    const { count } = await supabase
+      .from('projects')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+
+    if ((count || 0) >= 1) {
+      setLimitReached(true)
+    }
+    
+    setCheckingLimits(false)
+  }
 
   // Project fields
   const [name, setName] = useState('')
@@ -100,6 +139,56 @@ export default function NewProjectPage() {
     }
 
     router.push(`/dashboard/project/${project.id}`)
+  }
+
+  if (checkingLimits) {
+    return (
+      <main className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full"></div>
+      </main>
+    )
+  }
+
+  if (limitReached) {
+    return (
+      <main className="min-h-screen bg-slate-900">
+        <header className="border-b border-slate-800">
+          <div className="max-w-3xl mx-auto px-6 py-4">
+            <Link 
+              href="/dashboard" 
+              className="text-slate-400 hover:text-white flex items-center gap-2 transition"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Dashboard
+            </Link>
+          </div>
+        </header>
+        <div className="max-w-lg mx-auto px-6 py-16 text-center">
+          <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="w-8 h-8 text-amber-500" />
+          </div>
+          <h1 className="text-2xl font-bold text-white mb-3">Free Plan Limit Reached</h1>
+          <p className="text-slate-400 mb-6">
+            You've reached the 1 active project limit on the free plan. 
+            Upgrade to Pro for unlimited projects.
+          </p>
+          <div className="flex gap-4 justify-center">
+            <Link
+              href="/dashboard/billing"
+              className="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium transition"
+            >
+              Upgrade to Pro — $9/mo
+            </Link>
+            <Link
+              href="/dashboard"
+              className="border border-slate-600 hover:border-slate-500 text-slate-300 px-6 py-3 rounded-lg transition"
+            >
+              Go Back
+            </Link>
+          </div>
+        </div>
+      </main>
+    )
   }
 
   return (

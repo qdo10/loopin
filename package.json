@@ -11,6 +11,8 @@
   "dependencies": {
     "@stripe/stripe-js": "^8.7.0",
     "@supabase/supabase-js": "^2.95.3",
+    "@types/bcryptjs": "^2.4.6",
+    "bcryptjs": "^3.0.3",
     "lucide-react": "^0.563.0",
     "next": "16.1.6",
     "react": "19.2.3",

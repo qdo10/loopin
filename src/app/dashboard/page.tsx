@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { Project } from '@/lib/types'
-import { Plus, ExternalLink, MoreVertical, LogOut, Folder, CreditCard } from 'lucide-react'
+import { Plus, ExternalLink, MoreVertical, LogOut, Folder, CreditCard, Settings } from 'lucide-react'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -74,6 +74,13 @@ export default function DashboardPage() {
             {userName && (
               <span className="text-slate-400">Hey, {userName.split(' ')[0]}</span>
             )}
+            <Link
+              href="/dashboard/settings"
+              className="text-slate-400 hover:text-white transition flex items-center gap-2"
+            >
+              <Settings className="w-4 h-4" />
+              Settings
+            </Link>
             <Link
               href="/dashboard/billing"
               className="text-slate-400 hover:text-white transition flex items-center gap-2"
